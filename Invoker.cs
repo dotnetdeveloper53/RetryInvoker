@@ -35,7 +35,7 @@ namespace RetryInvoker
             return TryInvoke<Exception, T>(del, out value, out exceptions, attempts);
         }
 
-        public static bool TryInvoke(Action del, int attempts = 3, TimeSpan? retryInterval = null)
+        public static bool TryInvoke(Action del, int attempts = 3)
         {
             if (del == null) throw new ArgumentNullException("del");
 
@@ -45,7 +45,7 @@ namespace RetryInvoker
             {
                 del();
                 return null;
-            }, out value, out exceptions, attempts, retryInterval);
+            }, out value, out exceptions, attempts);
         }
 
         public static bool TryInvoke<TException>(Action del, out IList<Exception> exceptions, int attempts = 3)
@@ -59,16 +59,10 @@ namespace RetryInvoker
             }, out value, out exceptions, attempts);
         }
 
-        public static bool TryInvoke<TException, T>(Func<T> del, out T value, out IList<Exception> exceptions, int attempts = 3)
+        public static bool TryInvoke<TException, T>(Func<T> del, out T value, out IList<Exception> exceptions, TimeSpan retryInterval, int attempts = 3)
             where TException : Exception
         {
-            return TryInvoke<TException, T>(del, out value, out exceptions, attempts, (TimeSpan?)null);
-        }
-
-        public static bool TryInvoke<TException, T>(Func<T> del, out T value, out IList<Exception> exceptions, int attempts = 3, TimeSpan? retryInterval = null)
-            where TException : Exception
-        {
-            return TryInvoke<TException, T>(del, out value, out exceptions, attempts, retryInterval.HasValue ? new Interval(retryInterval.Value) : null);
+            return TryInvoke<TException, T>(del, out value, out exceptions, attempts, new Interval(retryInterval));
         }
 
         public static bool TryInvoke<TException, T>(Func<T> del, out T value, out IList<Exception> exceptions, int attempts = 3, IInterval interval = null)
