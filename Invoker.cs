@@ -24,6 +24,29 @@ namespace RetryInvoker
             }
         }
 
+        public class InvokerState<T>
+        {
+            public bool Success { get; set; }
+            public T Value { get; set; }
+            public InvokerState(bool success, T value)
+            {
+                this.Success = success;
+                this.Value = value;
+            }
+        }
+
+        public async static Task<InvokerState<T>> TryInvokeAsync<T>(Func<T> del, int attempts = 3)
+        {
+            return await Task.Factory.StartNew(() =>
+                {
+                    T value;
+                    if (TryInvoke<T>(del, out value, attempts))
+                        return new InvokerState<T>(true, value);
+                    else
+                        return new InvokerState<T>(false, value);
+                });
+        }
+
         public static bool TryInvoke<T>(Func<T> del, out T value, int attempts = 3)
         {
             IList<Exception> exceptions;
